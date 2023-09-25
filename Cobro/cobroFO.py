@@ -42,15 +42,17 @@ AutoA = "AutoA.png"
 qr_imagen = "reducida.png"
 PROMOCIONES = ('prom 1')
 
-nombre_estacionamiento = 'Amores'
+nombre_estacionamiento = 'PESTALOZZI'
 estilo = ('Arial', 12)
 font_promo = ('Arial', 9, "bold")
 
 from controller_email import main
+send_data = True
 
 class FormularioOperacion:
     def __init__(self):
-        atexit.register(main)
+        if send_data:
+            atexit.register(main)
 
         self.controlador_crud_pensionados = Pensionados()
         self.folio_auxiliar = None
@@ -235,7 +237,7 @@ class FormularioOperacion:
         self.button_promo_STARBUCKS = tk.Button(
             self.frame_promociones_botones,
             text="Promo STARBUCKS",
-            command=self.APLICAR_PROMO,
+            command=self.aplicar_promo_STARBUCKS,
             # width=10,
             height=2,
             anchor="center",
@@ -247,7 +249,7 @@ class FormularioOperacion:
         self.button_promo_LOCALES = tk.Button(
             self.frame_promociones_botones,
             text="Promo LOCALES",
-            command=self.APLICAR_PROMO,
+            command=self.aplicar_promo_LOCALES,
             # width=10,
             height=2,
             anchor="center",
@@ -682,21 +684,21 @@ class FormularioOperacion:
 
             # Calcula la tarifa y el importe a pagar
             if self.minutos_dentro == 0:
-                cuarto_hora = 0
+                self.cuarto_hora = 0
             elif self.minutos_dentro < 16 and self.minutos_dentro >= 1:
-                cuarto_hora = 1
+                self.cuarto_hora = 1
             elif self.minutos_dentro < 31 and self.minutos_dentro >= 16:
-                cuarto_hora = 2
+                self.cuarto_hora = 2
             elif self.minutos_dentro < 46 and self.minutos_dentro >= 31:
-                cuarto_hora = 3
+                self.cuarto_hora = 3
             elif self.minutos_dentro <= 59 and self.minutos_dentro >= 46:
-                cuarto_hora = 4
+                self.cuarto_hora = 4
 
             # Calcula el importe a pagar según la tabla de precios
             if self.horas_dentro <= 8:
 
-                importe = (self.horas_dentro * 24) + (cuarto_hora * 6)
-                if self.horas_dentro == 8 and cuarto_hora >= 2:
+                importe = (self.horas_dentro * 24) + (self.cuarto_hora * 6)
+                if self.horas_dentro == 8 and self.cuarto_hora >= 2:
                     importe = 200
 
             else:
@@ -2795,31 +2797,34 @@ class FormularioOperacion:
             return
 
         text_promo = promo
-
-        # Calcula la tarifa y el importe a pagar
-        minutos = 0
-
-        if self.minutos_dentro == 0:
-            minutos = 0
-        elif self.minutos_dentro < 16 and self.minutos_dentro >= 1:
-            minutos = 1
-        elif self.minutos_dentro < 31 and self.minutos_dentro >= 16:
-            minutos = 2
-        elif self.minutos_dentro < 46 and self.minutos_dentro >= 31:
-            minutos = 3
-        elif self.minutos_dentro <= 59 and self.minutos_dentro >= 46:
-            minutos = 4
-
         importe = 0
 
+        if text_promo == "STBs" and self.minutos_dentro <= 20 and self.horas_dentro == 0:
+            importe = 0
 
-        if self.horas_dentro <= 12:
-            importe = 60
-            if self.horas_dentro == 12 and self.minutos_dentro > 0:
-                importe = 60 + (self.dias_dentro * 250) + ((self.horas_dentro - 12) * 28) + (minutos * 7)
+        # Calcula el importe a pagar según la tabla de precios
+        elif self.horas_dentro <= 9:
+            if self.horas_dentro <= 2:
 
+                if self.horas_dentro == 2 and self.cuarto_hora >= 1:
+                    importe = (self.horas_dentro * 24) + (self.cuarto_hora * 6) - 24
+                else:
+                    if self.horas_dentro == 0: self.horas_dentro = 1
+                    importe = (self.horas_dentro * 12)
+
+            else:
+                if self.horas_dentro == 9 and self.cuarto_hora >= 2:
+                    importe = 200
+                else:
+                    importe = (self.horas_dentro * 24) + (self.cuarto_hora * 6) - 24
         else:
-            importe = 60 + (self.dias_dentro * 250) + ((self.horas_dentro - 12) * 28) + (minutos * 7)
+            importe = 200
+
+            # Calcula el importe total a pagar
+        importe = (self.dias_dentro * 200) + importe
+
+        # Establecer el importe y mostrarlo
+        self.mostrar_importe(importe)
 
         # Añade "Danado" a la descripción de la promoción si el boleto está marcado como "Danado"
         if TarifaPreferente == "Danado":
@@ -2830,6 +2835,12 @@ class FormularioOperacion:
 
         # Establecer el importe y mostrarlo
         self.mostrar_importe(importe)
+
+    def aplicar_promo_STARBUCKS(self):
+        self.APLICAR_PROMO("STBs")
+
+    def aplicar_promo_LOCALES(self):
+        self.APLICAR_PROMO("Locales")
 
 # aplicacion1=FormularioOperacion()
 
