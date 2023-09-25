@@ -10,4 +10,4 @@ sudo mysql_secure_installation
 
 CREATE DATABASE Parqueadero1;
 
-mysql -u USER -pPASWORD DATABASE < DB/db_base.sql
+mysql -u root -pRG980320 Parqueadero1 < DB/db_base.sql

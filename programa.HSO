@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd /home/pi/Documents/Amores/Cobro/
+cd /home/pi/Documentos/WORKSPACE/PESTALOZZI/Cobro
 
 sudo python3 pantallfull.py 
